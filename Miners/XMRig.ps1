@@ -7,7 +7,7 @@ $Commands = [PSCustomObject]@{
     "cryptonight" = " --cuda-devices $SelGPUCC --cuda-launch=8x120" #Cryptonight
     "cryptonight-lite" = " --cuda-devices $SelGPUCC --cuda-launch=8x120" #Cryptonight-lite
 }
-$Port = 2222
+$Port = $Variables.MinerAPITCPPort #2222
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
@@ -20,6 +20,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Port = $Port
         Wrap = $false
         URI = $Uri    
-        User = $Pools.(Get-Algorithm($_)).User
+		User = $Pools.(Get-Algorithm($_)).User
     }
 }

@@ -56,6 +56,13 @@ Function Write-Config {
     }
 }
 
+Function Get-FreeTcpPort {
+    $StartPort = 4068
+    $PortFound = $false
+    $Port = $StartPort
+    While ($Port -le ($StartPort + 10) -and !$PortFound) {try {$Null = New-Object System.Net.Sockets.TCPClient -ArgumentList 127.0.0.1, $Port; $Port++} catch {$Port; $PortFound = $True}}
+}
+
 function Set-Stat {
     param(
         [Parameter(Mandatory = $true)]
