@@ -1,3 +1,22 @@
+<#
+This file is part of NemosMiner
+Copyright (c) 2018 Nemo
+Copyright (c) 2018 MrPlus
+
+NemosMiner is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+NemosMiner is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#>
+
 Function Update-Status ($Text) {
     Write-host $Text
     $Variables.StatusText = $Text 
@@ -49,9 +68,10 @@ Function Write-Config {
         $OrderedConfig | ConvertTo-json | out-file $ConfigFile
         $PoolsConfig = Get-Content ".\Config\PoolsConfig.json" | ConvertFrom-Json
         $OrderedPoolsConfig = [PSCustomObject]@{}; $PoolsConfig | % {$_.psobject.properties | sort Name | % {$OrderedPoolsConfig | Add-Member -Force @{$_.Name = $_.Value}}}
-        $OrderedPoolsConfig.default.Wallet = $Config.Wallet
-        $OrderedPoolsConfig.default.UserName = $Config.UserName
-        $OrderedPoolsConfig.default.WorkerName = $Config.WorkerName
+        $OrderedPoolsConfig.default | Add-member -Force @{Wallet = $Config.Wallet}
+        $OrderedPoolsConfig.default | Add-member -Force @{UserName = $Config.UserName}
+        $OrderedPoolsConfig.default | Add-member -Force @{WorkerName = $Config.WorkerName}
+        $OrderedPoolsConfig.default | Add-member -Force @{APIKey = $Config.APIKey}
         $OrderedPoolsConfig | ConvertTo-json | out-file ".\Config\PoolsConfig.json"
     }
 }
@@ -331,19 +351,19 @@ function Get-HashRate {
                 do {
                   
                     $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing
-					
+                    
                     $Data = $Request | ConvertFrom-Json
 
                     $HashRate = [Double]$Data.hashrate.total[0]
                     if ($HashRate -eq "") {$HashRate = [Double]$Data.hashrate.total[1]}
-                   	if ($HashRate -eq "") {$HashRate = [Double]$Data.hashrate.total[2]}
-					
+                    if ($HashRate -eq "") {$HashRate = [Double]$Data.hashrate.total[2]}
+                    
                     if ($HashRate -eq $null) {$HashRates = @(); break}
 
                     $HashRates += [Double]$HashRate
 
-                   	if (-not $Safe) {break}
-					
+                    if (-not $Safe) {break}
+                    
                     Start-Sleep $Interval
                 }while ($HashRates.count -lt 6)
             }
@@ -363,9 +383,9 @@ function Get-HashRate {
 
                     $HashRate = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
                     if (-not $HashRate) {$HashRate = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum} #ewbf fix
-			
+            
                     if ($HashRate -eq $null) {$HashRates = @(); break}
-					
+                    
                     $HashRates += [Double]$HashRate
                     
                     if (-not $Safe) {break}
